@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ink: #e8ecf4;
+  --muted: #8b93a7;
+  --line: rgba(255, 255, 255, 0.09);
+  --card: #0f1219;
+  --bg: #07080c;
+}
+
+html, body { background: var(--bg); color: var(--ink); }
+
+body {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  -webkit-font-smoothing: antialiased;
+}
+
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; }
+.label { font-size: 10px; letter-spacing: 0.18em; color: var(--muted); text-transform: uppercase; }
+.hairline { border-color: var(--line); }
+
+@keyframes riseIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.rise { animation: riseIn 0.35s ease both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .rise { animation: none; }
+}
