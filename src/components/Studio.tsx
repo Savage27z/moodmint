@@ -33,7 +33,7 @@ const MOOD_TABLE = [
 const MOODS: Mood[] = ["euphoric", "happy", "calm", "nervous", "wrecked"];
 
 /** Rent for one Metaplex Core asset plus the signature fee, measured on devnet. */
-const EST_RENT_SOL = 0.0029;
+const EST_RENT_SOL = 0.0018;
 const EST_FEE_SOL = 0.000005;
 
 export default function Studio() {

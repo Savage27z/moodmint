@@ -33,7 +33,7 @@ The brief scores the moment before signing, so that screen states in plain langu
 
 - **What happens** — one Metaplex Core NFT is created in your wallet on devnet
 - **What you get** — a mascot in its current mood, which will keep changing
-- **What it costs** — about 0.0029 SOL rent plus about 0.000005 SOL network fee, roughly 0.002905 SOL total, all devnet
+- **What it costs** — about 0.0018 SOL rent plus about 0.000005 SOL network fee, roughly 0.001805 SOL total, all devnet
 - **Moodmint's cut** — nothing, no platform fee and no royalty
 - **Permissions** — none beyond creating this one NFT, no token approvals, no authority over anything you already hold
 - **What could go wrong** — devnet resets remove the NFT; if the price feed is down the mascot holds a neutral face rather than inventing a number; the image is drawn on request, so it needs this app online
@@ -54,6 +54,29 @@ Two independent sources, both named in the interface:
 - **Metaplex Core** asset creation (`create` from `@metaplex-foundation/mpl-core`) on devnet
 - Each asset's `uri` points to `/api/metadata/<assetAddress>`, which is generated per request
 - No custom program is deployed, no mint authority is retained, no delegate is set, and the app never takes custody of anything
+
+
+## Addresses, programs and external services
+
+Everything this app touches, as required by the submission rules.
+
+| What | Identifier | Notes |
+|---|---|---|
+| Metaplex Core program | `CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d` | The only on-chain program invoked. Not written by me. |
+| Custom program | none | No program is deployed by this project. |
+| Mint addresses | none fixed | Every mint generates a fresh Core asset keypair client-side. The address is shown after minting and links to Solana Explorer. |
+| Cluster | Solana **devnet** | `https://api.devnet.solana.com` by default, overridable. |
+| Token mints / approvals | none | No SPL mint is created, no token approval or delegate is ever requested. |
+| CoinGecko | `api.coingecko.com/api/v3/simple/price` | Public endpoint, no key, SOL/USD spot and 24h change. |
+| Fees to the developer | none | No platform fee, no royalty, no fee-taking account. |
+
+### Verifying the mint path yourself
+
+```bash
+node scripts/audit-mint.mjs https://moodmint-beta.vercel.app
+```
+
+It runs the same `create` call the app runs using a throwaway keypair, checks that the metadata and artwork endpoints answer, and compares the cost quoted on the signing screen against what the runtime actually charges.
 
 ## Run it locally
 
@@ -79,7 +102,7 @@ No private keys or seed phrases are in this repository, and the app never asks f
 | Layer | Choice |
 |---|---|
 | App | Next.js 14 (App Router), TypeScript, Tailwind |
-| Wallet | Solana wallet adapter (Phantom, Solflare) |
+| Wallet | Phantom injected provider, talked to directly |
 | NFT | Metaplex Core via Umi |
 | Artwork | Hand-authored 16x16 pixel maps rendered to SVG on the server |
 | Network | Solana devnet |
@@ -100,11 +123,14 @@ src/
     api/metadata/[mint]/route.ts per-request NFT metadata
     page.tsx                     entry
   components/
-    Providers.tsx                wallet adapter setup
     Studio.tsx                   interface + signing screen
   lib/
     mascot.ts                    pixel maps, palettes, SVG renderer
     market.ts                    data sources, caching, failure handling
+    phantom.ts                   wallet connection
+scripts/
+  audit-mint.mjs                 audits the mint path against devnet
+  make-og.py                     builds the social card from the pixel maps
 ```
 
 ## Limits
