@@ -65,10 +65,21 @@ Everything this app touches, as required by the submission rules.
 | Metaplex Core program | `CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d` | The only on-chain program invoked. Not written by me. |
 | Custom program | none | No program is deployed by this project. |
 | Mint addresses | none fixed | Every mint generates a fresh Core asset keypair client-side. The address is shown after minting and links to Solana Explorer. |
+| Live minted example | [`2XhJiXMSxyLPGraagLFBB6WNS7w2bnLbe6kbLyAPRjbX`](https://explorer.solana.com/address/2XhJiXMSxyLPGraagLFBB6WNS7w2bnLbe6kbLyAPRjbX?cluster=devnet) | A real asset minted through the live app. Its `uri` points at this deployment's metadata endpoint, so the artwork it serves changes with the market. |
 | Cluster | Solana **devnet** | `https://api.devnet.solana.com` by default, overridable. |
 | Token mints / approvals | none | No SPL mint is created, no token approval or delegate is ever requested. |
 | CoinGecko | `api.coingecko.com/api/v3/simple/price` | Public endpoint, no key, SOL/USD spot and 24h change. |
 | Fees to the developer | none | No platform fee, no royalty, no fee-taking account. |
+
+### Verify the live example
+
+```
+Asset:  2XhJiXMSxyLPGraagLFBB6WNS7w2bnLbe6kbLyAPRjbX
+Name:   Moodmint #2XhJ
+URI:    https://moodmint-beta.vercel.app/api/metadata/2XhJiXMSxyLPGraagLFBB6WNS7w2bnLbe6kbLyAPRjbX
+```
+
+Open it in [Solana Explorer](https://explorer.solana.com/address/2XhJiXMSxyLPGraagLFBB6WNS7w2bnLbe6kbLyAPRjbX?cluster=devnet) and note two things: **the owner and the update authority are both the wallet that minted it**, not this app. Moodmint keeps no authority over anything it creates. Fetch the `uri` twice on days the market has moved and the artwork differs, because it is generated per request rather than stored.
 
 ### Verifying the mint path yourself
 
