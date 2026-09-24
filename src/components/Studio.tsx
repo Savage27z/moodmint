@@ -6,7 +6,7 @@ import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 import { walletAdapterIdentity } from "@metaplex-foundation/umi-signer-wallet-adapters";
 import { generateSigner } from "@metaplex-foundation/umi";
 import { create, mplCore } from "@metaplex-foundation/mpl-core";
-import { RPC_ENDPOINT, usePhantom } from "@/lib/phantom";
+import { RPC_ENDPOINT, useWallet, type WalletOption } from "@/lib/wallets";
 import type { Mood } from "@/lib/mascot";
 
 type Market = {
@@ -37,7 +37,9 @@ const EST_RENT_SOL = 0.0018;
 const EST_FEE_SOL = 0.000005;
 
 export default function Studio() {
-  const { publicKey, connect, disconnect, connecting, installed, provider } = usePhantom();
+  const { publicKey, connect, disconnect, connecting, provider, wallets, available, active } =
+    useWallet();
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   const [market, setMarket] = useState<Market | null>(null);
   const [tick, setTick] = useState(0);
@@ -159,18 +161,23 @@ export default function Studio() {
           {publicKey ? (
             <button
               onClick={disconnect}
-              className="rounded-lg border hairline px-3 h-[38px] text-[12px]"
+              className="rounded-lg border hairline px-3 h-[38px] text-[12px] flex items-center gap-2"
               title="Disconnect"
             >
+              <span className="text-[color:var(--muted)]">{active?.name}</span>
               {short}
             </button>
           ) : (
             <button
-              onClick={connect}
+              onClick={() => {
+                // One wallet installed is not a choice worth making the user make.
+                if (available.length === 1) connect(available[0].id);
+                else setPickerOpen(true);
+              }}
               disabled={connecting}
               className="rounded-lg bg-white text-black px-4 h-[38px] text-[13px] disabled:opacity-40"
             >
-              {connecting ? "Connecting..." : installed === false ? "Get Phantom" : "Connect wallet"}
+              {connecting ? "Connecting..." : "Connect wallet"}
             </button>
           )}
         </div>
@@ -271,9 +278,9 @@ export default function Studio() {
             </p>
             {!publicKey ? (
               <p className="mt-4 text-[12px]">
-                {installed === false
-                  ? "Phantom was not detected in this browser."
-                  : "Connect a wallet to continue."}
+                {available.length === 0
+                  ? "No Solana wallet detected in this browser."
+                  : `Connect a wallet to continue. Detected: ${available.map((w) => w.name).join(", ")}.`}
               </p>
             ) : (
               <>
@@ -329,6 +336,17 @@ export default function Studio() {
         </div>
       </section>
 
+      {pickerOpen && (
+        <WalletPicker
+          wallets={wallets}
+          onPick={(id) => {
+            setPickerOpen(false);
+            connect(id);
+          }}
+          onClose={() => setPickerOpen(false)}
+        />
+      )}
+
       {sheetOpen && (
         <SignSheet
           onCancel={() => setSheetOpen(false)}
@@ -347,6 +365,80 @@ export default function Studio() {
         </div>
       </footer>
     </main>
+  );
+}
+
+/** Wallet chooser. Installed wallets first, the rest offered as install links. */
+function WalletPicker({
+  wallets,
+  onPick,
+  onClose,
+}: {
+  wallets: WalletOption[];
+  onPick: (id: string) => void;
+  onClose: () => void;
+}) {
+  const installed = wallets.filter((w) => w.provider);
+  const missing = wallets.filter((w) => !w.provider && w.id !== "injected");
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 p-0 sm:p-5"
+      onClick={onClose}
+    >
+      <div
+        className="card w-full sm:max-w-sm p-5 rounded-b-none sm:rounded-2xl rise"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="label">Connect a wallet</div>
+        <h2 className="mt-2 text-[17px]">Solana devnet</h2>
+
+        {installed.length > 0 && (
+          <div className="mt-4 grid gap-2">
+            {installed.map((w) => (
+              <button
+                key={w.id}
+                onClick={() => onPick(w.id)}
+                className="w-full rounded-lg border hairline px-4 py-3 text-[13px] text-left hover:bg-white/[0.06] flex items-center justify-between"
+              >
+                {w.name}
+                <span className="text-[10px] text-[color:var(--muted)]">DETECTED</span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {installed.length === 0 && (
+          <p className="mt-4 text-[12px] text-[color:var(--muted)] leading-relaxed">
+            No Solana wallet was detected in this browser. Install one below, then reload this page.
+          </p>
+        )}
+
+        {missing.length > 0 && (
+          <div className="mt-4 pt-4 border-t hairline">
+            <div className="label">Not installed</div>
+            <div className="mt-2 grid gap-2">
+              {missing.map((w) => (
+                <a
+                  key={w.id}
+                  href={w.installUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-full rounded-lg border hairline px-4 py-3 text-[13px] flex items-center justify-between text-[color:var(--muted)] hover:bg-white/[0.04]"
+                >
+                  {w.name}
+                  <span className="text-[10px]">GET</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <button onClick={onClose} className="mt-4 w-full rounded-lg border hairline py-3 text-[13px]">
+          Cancel
+        </button>
+      </div>
+    </div>
   );
 }
 

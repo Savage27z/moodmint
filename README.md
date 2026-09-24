@@ -102,7 +102,7 @@ No private keys or seed phrases are in this repository, and the app never asks f
 | Layer | Choice |
 |---|---|
 | App | Next.js 14 (App Router), TypeScript, Tailwind |
-| Wallet | Phantom injected provider, talked to directly |
+| Wallet | Phantom, Solflare and Backpack via their injected providers |
 | NFT | Metaplex Core via Umi |
 | Artwork | Hand-authored 16x16 pixel maps rendered to SVG on the server |
 | Network | Solana devnet |
@@ -127,7 +127,7 @@ src/
   lib/
     mascot.ts                    pixel maps, palettes, SVG renderer
     market.ts                    data sources, caching, failure handling
-    phantom.ts                   wallet connection
+    wallets.ts                   multi-wallet detection and connection
 scripts/
   audit-mint.mjs                 audits the mint path against devnet
   make-og.py                     builds the social card from the pixel maps
