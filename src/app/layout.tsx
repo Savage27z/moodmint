@@ -1,7 +1,18 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
-const BASE = process.env.NEXT_PUBLIC_BASE_URL || "https://moodmint.vercel.app";
+/**
+ * Resolved in priority order so link previews work without any manual config:
+ * an explicit override, then Vercel's stable production alias, then the
+ * per-deployment URL, then local dev.
+ */
+const BASE =
+  process.env.NEXT_PUBLIC_BASE_URL ||
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : "http://localhost:3400");
 
 const title = "Moodmint - an NFT that feels the market";
 const description =
